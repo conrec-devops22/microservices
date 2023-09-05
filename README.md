@@ -1,85 +1,97 @@
-# Microservices Lab 2: Docker Compose
+# Microservices Lab 3: Add Prometheus for metrics collection
 
-Update our microservices to use Docker Compose for building and orchestration.
+Prometheus: An open-source monitoring system with a dimensional data model, flexible query language, efficient time series database and modern alerting approach.
 
-## Preparation
+https://en.wikipedia.org/wiki/Prometheus_(software)
 
-Ensure no containers are currently running, or it will interfere with Docker Compose:
-```sh
-$ docker container list
-```
-The list should be empty. If it's not, let's stop them:
-```sh
-$ docker container stop <container_id>
-```
-And optionally remove them as well:
-```sh
-$ docker container remove <container_id>
-```
+## What is metrics?
 
-## Update service2/app.py
+Metrics is anything you can measure. Anything, really.
 
-Since Docker Compose will create and name containers for us, we need to move from using container names to service names. New `hello_world()` for `service2/app.py`:
+## What did we do?
 
-```py
-@app.route("/")
-def hello_world():
-    r = requests.get("http://service1:5001")
-    return f"Hello from Service 2. Service 1 says: {r.text}!"
-```
-
-## Add a docker-compose.yaml
+* We updated docker-compose.yaml with the following section:
 
 ```yaml
-version: '3'
-
-networks:
-  my_network:
-    driver: bridge
-
-services:
-  service1:
-    build: ./service1
-    networks:
-      - my_network
-
-  service2:
-    build: ./service2
-    networks:
-      - my_network
+  prometheus:
+    image: prom/prometheus:latest
     ports:
-      - "5002:5002"
+      - "9090:9090"
+    networks:
+      - my_network
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
 ```
 
-This instructs Docker Compose how to build our images and how to deploy them later on.
+* We created as simple prometheus.yml:
 
-## Build and run 
+```yaml
+global:
+  scrape_interval: 5s
+scrape_configs:
+  - job_name: 'service1'
+    static_configs:
+      - targets: ['service1:5001']
+  - job_name: 'service2'
+    static_configs:
+      - targets: ['service2:5002']
+````
+
+* We added `prometheus-flask-exporter` as Python package to our `Dockerfile`s.
+
+* We added a `/metrics` endpoint to our `app.py`
+
+```py
+from prometheus_flask_exporter import PrometheusMetrics
+
+app = Flask(__name__)
+metrics = PrometheusMetrics(app, path="/metrics")
+```
+
+* We added some metrics related to our HTTP endpoint for counting number of requests.
+
+```py
+@metrics.counter(
+    "invocation_by_method",
+    "Number of invocations by HTTP method",
+)
+@app.route("/")
+def hello_world():
+    return "Hello, World!"
+```
+
+* We learned that <span style="color:red">**running in Debug Mode could really take extensive time to debug**</span> as it completely breaks Flask routes.
+
+```py
+app.run(host="0.0.0.0", port=5001, debug=False)  # Very important to disable debug mode
+```
+
+* We made sure we reset everything in Docker Compose, terminating any containers and even removing all images.
 
 ```sh
-$ docker compose up --build --remove-orphans --detach
+$ docker compose down --rmi all
 ```
 
-This will build and run it all and then detach to leave it running in the background.
-
-Parameter explanations:
-```
---build            Build images before starting
---remove-orphans   Remove any container not part of this compose file
---detach           Detach from terminal but keep running in the background
-```
-
-***NOTE:*** *Containers not _started_ by Docker Compose will _not_ be removed by `--remove-orphans`!*
-
-## Try it out
-
-Go visit http://localhost:5002 and see if it works!
-
-## Docker Compose commands to try out
+* We started Docker Compose asking it to build our service for us.
 
 ```sh
-$ docker compose ps              # List running containers
-$ docker compose logs            # Show logs from running containers
-$ docker compose logs -f         # Show logs and keep follow the log in realtime
-$ docker compose log <service>   # Show logs from <service> only
-$ docker compose --help          # List all commands available - feel free to try out some!
+$ docker compose up --build
 ```
+
+* We visited our `/metrics` endpoint
+
+http://127.0.0.1:5002/metrics
+
+* We visited Prometheus and looked at the metrics collected
+
+http://127.0.0.1:9090
+
+* We entered a PromQL query:
+
+`flask_http_request_duration_seconds_count` which is an automatically generated metric.
+
+`invocation_by_method_created` is the one we created in `app.py`
+
+Try them both out!
+
+*Hint: watch out for date and time ranges!*
