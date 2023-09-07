@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service2-deployment
+  labels:
+    app: service2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: service2
+  template:
+    metadata:
+      labels:
+        app: service2
+    spec:
+      containers:
+        - name: service2
+          imagePullPolicy: Never
+          image: microservice2:1.0.0
+          ports:
+            - containerPort: 5002
