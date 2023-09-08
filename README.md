@@ -2,53 +2,125 @@
 
 Mission: Make two microservices, make them communicate privately and open up one for host access (http://localhost:5002)
 
-## Add a User-Defined Bridge Network:
+## Using Minikube to Deploy Microservices
 
-```
-docker network create my_network
-```
+### Prerequisites
 
-## Build and run Service 1
+Before you begin, ensure you have the following installed on your system:
 
-```
-$ cd service1
-```
-Build it and name it `service1`:
-```
-$ docker image build -t service1 .
-```
-Run it:
-```
-$ docker container run --rm --detach --name service1_container --network my_network service1
-```
+1. [Docker](https://docs.docker.com/get-docker/)
+2. [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+3. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-Parameter explanations:
-```
---rm        Remove container when stopped or finished running
---detach    Detach from terminal but keep running inside Docker
---name      Specify a custom name for the container
---network   Attach the container to a network
-```
+### Step 1: Install and Start Minikube
 
-## Build and run Service 2
+1. Install Minikube by following the official documentation for your operating system.
 
-```
-$ cd service2
-```
-Build it and name it `service2`:
-```
-$ docker image build -t service2 .
-```
-Run it:
-```
-$ docker container run --rm -d --name service2-container --network my_network --publish 5002:5002 service2
+2. Start Minikube by running the following command:
+   ```bash
+   minikube start
+   ```
+
+This command will create a new Minikube cluster.
+
+### Step 2: Point Minikube to Docker Environment
+
+To use Minikube's built-in Docker daemon, execute the following command:
+
+```bash
+eval $(minikube docker-env)
 ```
 
-Parameter explanations:
+This command configures your shell to use the Docker daemon inside Minikube's virtual machine, allowing you to build Docker images that will be available to your Minikube cluster.
+
+### Step 3: Create Docker Images
+
+Assuming you have your microservices code and Dockerfiles ready, you can now build Docker images for your microservices. Navigate to your microservice project directories and run the following commands for each microservice:
+
+```bash
+docker build -t microservice1:1.0.0 .
 ```
---publish   Which ports to expose to Host network
+```bash
+docker build -t microservice2:1.0.0 .
 ```
 
-## Try it out
+### Step 4: Deploy Microservices with Kubernetes
 
-Go visit http://localhost:5002 and see if it works!
+Now that you have Docker images for your microservices, you can create Kubernetes deployments and services for them.
+
+1. Create a Kubernetes deployment YAML file for each microservice. Example YAML:
+
+   ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+    name: serviceX-deployment
+    labels:
+        app: serviceX
+    spec:
+    replicas: 3
+    selector:
+        matchLabels:
+        app: serviceX
+    template:
+        metadata:
+        labels:
+            app: serviceX
+        spec:
+        containers:
+            - name: serviceX
+            imagePullPolicy: Never
+            image: microserviceX:1.0.0
+            ports:
+                - containerPort: <port>
+   ```
+
+2. Apply the deployment to your Minikube cluster using `kubectl`:
+
+   ```bash
+   kubectl apply -f <microservice-deployment.yaml>
+   ```
+
+   Repeat this step for each microservice.
+
+3. Create a Kubernetes service YAML file for each microservice. Example YAML:
+
+   ```yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+    name: serviceX-service
+    spec:
+    selector:
+        app: serviceX
+    ports:
+        - port: <port>
+        targetPort: <port>
+   ```
+
+   Replace `<microservice-name>` with your microservice's name.
+
+4. Apply the service to your Minikube cluster using `kubectl`:
+
+   ```bash
+   kubectl apply -f <microservice-service.yaml>
+   ```
+
+   Repeat this step for each microservice.
+
+### Step 5: Accessing Microservices
+
+To access your microservices, you can use Minikube's built-in service:
+
+```bash
+minikube service <microservice-name>-service
+```
+
+This will open a browser or terminal window with the URL to your microservice.
+
+Remember to clean up your resources when you're done:
+
+```bash
+minikube stop
+minikube delete
+```
