@@ -19,7 +19,7 @@ jobs:
       run: |
         export SHELL=/bin/bash
         eval $(minikube -p minikube docker-env)
-        docker build -f ./Dockerfile -t microservice1:${{ env.urrent_version }} ./service1
+        docker build -f ./Dockerfile -t microservice1:${{ env.current_version }} ./service1
         docker build -f ./Dockerfile -t microservice2:${{ env.current_version }} ./service2
     - name: Print docker images
       run: docker images 
