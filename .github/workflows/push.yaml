@@ -13,16 +13,19 @@ jobs:
       uses: medyagh/setup-minikube@master
     - name: Try the cluster
       run: kubectl get pods -A
+    - name: Bump version
+    run: |
+      pip install bump2version
+      bump2version major 
+      git push --follow-tags
     - name: Build microservice1 image
       run: |
+        pip install bump2version
+        bump2version patch
         export SHELL=/bin/bash
         eval $(minikube -p minikube docker-env)
-        docker build -f ./Dockerfile -t microservice1: .
-    - name: Build microservice2 image
-      run: |
-        export SHELL=/bin/bash
-        eval $(minikube -p minikube docker-env)
-        docker build -f ./Dockerfile -t microservice2: . 
+        docker build -f ./Dockerfile -t microservice1:${{ steps.build.outputs.version }} ./service1
+        docker build -f ./Dockerfile -t microservice2:${{ steps.build.outputs.version }} ./service2
     - name: Print docker images
       run: docker images 
     - name: Deploy to minikube
