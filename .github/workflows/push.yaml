@@ -1,0 +1,39 @@
+name: Deploy to Minikube
+on:
+  push:
+    branches:
+      - 05-setup-github-workflow 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Deploy to minikube in Github Actions!
+    steps:
+    - uses: actions/checkout@v2
+    - name: Start minikube
+      uses: medyagh/setup-minikube@master
+    - name: Try the cluster
+      run: kubectl get pods -A
+    - name: Build microservice1 image
+      run: |
+        export SHELL=/bin/bash
+        eval $(minikube -p minikube docker-env)
+        docker build -f ./Dockerfile -t microservice1: .
+    - name: Build microservice2 image
+      run: |
+        export SHELL=/bin/bash
+        eval $(minikube -p minikube docker-env)
+        docker build -f ./Dockerfile -t microservice2: . 
+    - name: Print docker images
+      run: docker images 
+    - name: Deploy to minikube
+      run:
+        kubectl apply -f deployment-service1.yaml
+        kubectl apply -f deployment-service2.yaml
+        kubectl apply -f service-service1.yaml
+        kubectl apply -f service-service2.yaml
+    - name: Test service URLs
+      run: |
+        minikube service list
+        minikube service service2-service --url
+        echo "------------------opening the service------------------"
+        curl $(minikube service service2-service --url)        
