@@ -67,7 +67,7 @@ jobs:
           echo "Running pods: $running_pods / $total_pods"
           
           # Check if all pods are in the "Running" state
-          if [[ ! " ${pod_statuses[@]} " =~ "Pending" ]]; then
+          if [[ ! "$pod_status" =~ "Pending" ]]; then
             echo "All pods are running and ready."
             break
           fi
