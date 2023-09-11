@@ -59,6 +59,6 @@ jobs:
       run: |
         eval $(minikube -p minikube docker-env)
         minikube service list
-        kubectl describe service service2-service
-        echo "------------------opening the service 2------------------"
-        curl http://service2-service:5002       
+        minikube service --wait 60 service2-service --url
+        echo "------------------opening the service------------------"
+        curl $(minikube service service2-service --url)        
