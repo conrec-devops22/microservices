@@ -11,6 +11,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Start minikube
       uses: medyagh/setup-minikube@master
+      id: minikube
+      with:
+        driver: docker
+        wait: all
     - name: Try the cluster
       run: kubectl get pods -A
     - name: Setup Docker environment
