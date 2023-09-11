@@ -26,7 +26,7 @@ jobs:
     - name: Print docker images
       run: docker images 
     - name: Deploy to minikube
-      run:
+      run: |
         kubectl apply -f deployment-service1.yaml
         kubectl apply -f deployment-service2.yaml
         kubectl apply -f service-service1.yaml
