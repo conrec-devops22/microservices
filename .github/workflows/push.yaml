@@ -60,7 +60,6 @@ jobs:
         ./check_pods.sh
       timeout-minutes: 15 
     - name: Test service URLs
-      continue-on-error: true
       run: |
         eval $(minikube -p minikube docker-env)
         echo "------------------all service details------------------"
