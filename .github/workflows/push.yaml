@@ -26,13 +26,20 @@ jobs:
         sed -e "s/microservice1:1.0.0/microservice1:${{ env.current_version }}/g" deployment-service1.yaml > modified-deployment-service1.yaml
         sed -e "s/microservice2:1.0.0/microservice1:${{ env.current_version }}/g" deployment-service2.yaml > modified-deployment-service2.yaml
     - name: Build microservice1 image
-      run: docker build -f ./service1/Dockerfile -t microservice1:${{ env.current_version }} ./service1
+      run: |
+        eval $(minikube -p minikube docker-env)
+        docker build -f ./service1/Dockerfile -t microservice1:${{ env.current_version }} ./service1
     - name: Build microservice2 image
-      run: docker build -f ./service2/Dockerfile -t microservice2:${{ env.current_version }} ./service2
+      run: |
+        eval $(minikube -p minikube docker-env)
+        docker build -f ./service2/Dockerfile -t microservice2:${{ env.current_version }} ./service2
     - name: Print docker images
-      run: docker images 
+      run: |
+        eval $(minikube -p minikube docker-env)
+        docker images 
     - name: Deploy to minikube
       run: |
+        eval $(minikube -p minikube docker-env)
         kubectl apply -f modified-deployment-service1.yaml
         kubectl apply -f modified-deployment-service2.yaml
         kubectl apply -f service-service1.yaml
@@ -50,6 +57,7 @@ jobs:
       timeout-minutes: 15 
     - name: Test service URLs
       run: |
+        eval $(minikube -p minikube docker-env)
         minikube service list
         minikube service service2-service --url
         echo "------------------opening the service------------------"
