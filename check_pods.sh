@@ -1,4 +1,3 @@
-set -x
 # Set a timeout limit (adjust as needed)
 TIMEOUT_SECONDS=600  # 10 minutes
 
@@ -8,6 +7,7 @@ start_time=$(date +%s)
 # Loop until all pods are in the "Running" state or until timeout is reached
 while true; do
   # Get the list of pods in the namespace
+  kubectl get pods
   pod_status=$(kubectl get pods -o jsonpath='{range .items[*]}{.status.phase}{"\n"}{end}')
   
   # Count the number of pods in the "Running" state
