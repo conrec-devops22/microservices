@@ -13,7 +13,7 @@ jobs:
       uses: medyagh/setup-minikube@master
       id: minikube
       with:
-        driver: docker
+        driver: none
         wait: all
     - name: Try the cluster
       run: kubectl get pods -A
@@ -62,7 +62,8 @@ jobs:
     - name: Test service URLs
       run: |
         eval $(minikube -p minikube docker-env)
-        echo "------------------all service details------------------"
         minikube service list
-        echo "------------------service 2 details------------------"
+        echo "------------------service details------------------"
         kubectl get service service2-service
+        echo "------------------opening the service------------------"
+        curl $(minikube service service2-service --url)        
