@@ -13,7 +13,7 @@ jobs:
       uses: medyagh/setup-minikube@master
       id: minikube
       with:
-        driver: ssh
+        driver: docker
         wait: all
     - name: Try the cluster
       run: kubectl get pods -A
