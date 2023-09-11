@@ -41,6 +41,24 @@ jobs:
       run: kubectl get service
     - name: List pods
       run: kubectl get pods
+    - name: Get pod name
+      id: pod
+      run: |
+        # Get the name of a pod (replace the logic here with your selection criteria)
+        POD_NAME=$(kubectl get pods -o jsonpath='{.items[0].metadata.name}')
+        echo "Selected pod name: $POD_NAME"
+        
+        # Set the pod name as an output variable
+        echo "::set-output name=pod_name::$POD_NAME"
+        
+    - name: Describe selected pod
+      run: |
+        # Get the pod name from the output variable
+        POD_NAME=${{ steps.pod.outputs.pod_name }}
+        
+        # Describe the selected pod
+        kubectl describe pod "$POD_NAME"
+
     - name: Test service URLs
       run: |
         minikube service list
