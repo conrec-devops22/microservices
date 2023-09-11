@@ -69,4 +69,5 @@ jobs:
         kubectl get service service2-service
         echo "------------------request the service 2------------------"
         service_port=$(kubectl get svc service2-service -o jsonpath="{.spec.ports[0].nodePort}")
-        curl -s http://service2-service:$service_port
+        echo ${service_port}
+        curl -s http://$(minikube ip):$service_port
