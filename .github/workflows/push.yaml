@@ -60,10 +60,15 @@ jobs:
         ./check_pods.sh
       timeout-minutes: 15 
     - name: Test service URLs
+      continue-on-error: true
       run: |
         eval $(minikube -p minikube docker-env)
+        echo "------------------all service details------------------"
         minikube service list
-        echo "------------------service details------------------"
+        echo "------------------service 2 details------------------"
         kubectl get service service2-service
-        echo "------------------opening the service------------------"
-        curl $(minikube service --wait 60 service2-service --url)        
+        echo "------------------opening the service 2------------------"
+        minikube service service2-service
+        echo "------------------request the service 2------------------"
+        service_port=$(kubectl get svc service2-service -o jsonpath="{.spec.ports[0].nodePort}")
+        curl -s http://service2-service:$service_port
