@@ -13,12 +13,16 @@ jobs:
       uses: medyagh/setup-minikube@master
     - name: Try the cluster
       run: kubectl get pods -A
+    - name: Setup Docker environment
+      run: eval $(minikube -p minikube docker-env)
     - name: Print current app version
       run: |
         echo "current_version=$(grep '# version' version.md | cut -d ' ' -f3)" >> $GITHUB_ENV
         echo "Current version: ${{ env.current_version }}"
-    - name: Setup Docker environment
-      run: eval $(minikube -p minikube docker-env)
+    - name: Generate Modified Deployment YAML
+      run: |
+        sed -e "s/microservice1:1.0.0/microservice1:${{ env.current_version }}/g" deployment-service1.yaml > modified-deployment-service1.yaml
+        sed -e "s/microservice2:1.0.0/microservice1:${{ env.current_version }}/g" deployment-service2.yaml > modified-deployment-service2.yaml
     - name: Build microservice1 image
       run: docker build -f ./service1/Dockerfile -t microservice1:${{ env.current_version }} ./service1
     - name: Build microservice2 image
@@ -27,8 +31,8 @@ jobs:
       run: docker images 
     - name: Deploy to minikube
       run: |
-        kubectl apply -f deployment-service1.yaml
-        kubectl apply -f deployment-service2.yaml
+        kubectl apply -f modified-deployment-service1.yaml
+        kubectl apply -f modified-deployment-service2.yaml
         kubectl apply -f service-service1.yaml
         kubectl apply -f service-service2.yaml
     - name: List deployments
