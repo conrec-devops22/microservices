@@ -14,7 +14,9 @@ jobs:
     - name: Try the cluster
       run: kubectl get pods -A
     - name: Setup Docker environment
-      run: eval $(minikube -p minikube docker-env)
+      run: |
+        export SHELL=/bin/bash
+        eval $(minikube -p minikube docker-env)
     - name: Print current app version
       run: |
         echo "current_version=$(grep '# version' version.md | cut -d ' ' -f3)" >> $GITHUB_ENV
