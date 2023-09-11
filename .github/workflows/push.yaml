@@ -59,6 +59,5 @@ jobs:
       run: |
         eval $(minikube -p minikube docker-env)
         minikube service list
-        minikube service service2-service
         echo "------------------opening the service------------------"
         curl $(minikube service service2-service)        
