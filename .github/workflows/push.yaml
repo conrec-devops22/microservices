@@ -67,9 +67,3 @@ jobs:
         minikube service list
         echo "------------------service 2 details------------------"
         kubectl get service service2-service
-        echo "------------------request the service 2------------------"
-        host=$(kubectl get svc service2-service -o jsonpath="{.spec.clusterIP}")
-        service_port=$(kubectl get svc service2-service -o jsonpath="{.spec.ports[0].nodePort}")
-        echo ${host}
-        echo ${service_port}
-        curl -s http://192.168.49.2:$service_port
