@@ -11,10 +11,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Start minikube
       uses: medyagh/setup-minikube@master
-      id: minikube
-      with:
-        driver: docker
-        wait: all
     - name: Try the cluster
       run: kubectl get pods -A
     - name: Setup Docker environment
@@ -28,18 +24,15 @@ jobs:
     - name: Generate Modified Deployment YAML
       run: |
         sed -e "s/microservice1:1.0.0/microservice1:${{ env.current_version }}/g" deployment-service1.yaml > modified-deployment-service1.yaml
-        sed -e "s/microservice2:1.0.0/microservice1:${{ env.current_version }}/g" deployment-service2.yaml > modified-deployment-service2.yaml
+        sed -e "s/microservice2:1.0.0/microservice2:${{ env.current_version }}/g" deployment-service2.yaml > modified-deployment-service2.yaml
     - name: Build microservice1 image
       run: |
-        eval $(minikube -p minikube docker-env)
         docker build -f ./service1/Dockerfile -t microservice1:${{ env.current_version }} ./service1
     - name: Build microservice2 image
       run: |
-        eval $(minikube -p minikube docker-env)
         docker build -f ./service2/Dockerfile -t microservice2:${{ env.current_version }} ./service2
     - name: Print docker images
       run: |
-        eval $(minikube -p minikube docker-env)
         docker images 
     - name: Deploy to minikube
       run: |
@@ -67,5 +60,4 @@ jobs:
         echo "------------------service details------------------"
         kubectl get service service2-service
         echo "------------------opening the service------------------"
-        echo 
         curl $(minikube service service2-service --url)/        
