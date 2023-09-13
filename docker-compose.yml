@@ -4,20 +4,36 @@ services:
   service1:
     build:
       context: ./service1
-      dockerfile: Dockerfile 
-    container_name: service1-service   
+      dockerfile: Dockerfile
+    container_name: service1-service
     networks:
       - my_network
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        fluentd-async: "true"
+        tag: "service1"
+    depends_on:
+      - fluentd
 
   service2:
     build:
       context: ./service2
-      dockerfile: Dockerfile 
+      dockerfile: Dockerfile
     container_name: service2-service
     ports:
       - "5002:5002"
     networks:
       - my_network
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        fluentd-async: "true"
+        tag: "service2"
+    depends_on:
+      - fluentd
 
   prometheus:
     image: prom/prometheus:latest
@@ -32,5 +48,57 @@ services:
       - service1
       - service2
 
+  fluentd:
+    build: ./fluentd
+    container_name: fluentd-container
+    volumes:
+      - ./fluentd/conf:/fluentd/etc
+    networks:
+      - "my_network"
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.2
+    container_name: elasticsearch
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    networks:
+      - "my_network"
+    ports:
+      - "9200:9200"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65535
+        hard: 65535
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - elasticsearch-data-volume:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.2
+    networks:
+      - "my_network"
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
 networks:
   my_network:
+
+
+volumes:
+  elasticsearch-data-volume:
+    driver: local
