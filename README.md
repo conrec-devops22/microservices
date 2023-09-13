@@ -12,115 +12,63 @@ Before you begin, ensure you have the following installed on your system:
 2. [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 3. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-### Step 1: Install and Start Minikube
+# Deploy to Minikube GitHub Actions Workflow
 
-1. Install Minikube by following the official documentation for your operating system.
+This GitHub Actions workflow automates the deployment of microservices to a Minikube Kubernetes cluster. It assumes that you have set up a Minikube cluster and that your Kubernetes service is of type NodePort.
 
-2. Start Minikube by running the following command:
-   ```bash
-   minikube start
-   ```
+## Workflow Steps
 
-This command will create a new Minikube cluster.
+### Step 1: Checkout Code
+- This step checks out your code repository so that subsequent steps can access your project files.
 
-### Step 2: Point Minikube to Docker Environment
+### Step 2: Start Minikube
+- This step sets up Minikube using the Docker driver and waits for all components to be ready.
 
-To use Minikube's built-in Docker daemon, execute the following command:
+### Step 3: Try the Cluster
+- This step verifies the Minikube cluster by listing pods in all namespaces.
 
-```bash
-eval $(minikube docker-env)
-```
+### Step 4: Setup Docker Environment
+- This step configures the Docker environment to use Minikube's Docker daemon.
 
-This command configures your shell to use the Docker daemon inside Minikube's virtual machine, allowing you to build Docker images that will be available to your Minikube cluster.
+### Step 5: Print Current App Version
+- This step reads the current version from a `version.md` file and sets it as an environment variable.
 
-### Step 3: Create Docker Images
+### Step 6: Generate Modified Deployment YAML
+- This step creates modified deployment YAML files with the updated image tags based on the current version.
 
-Assuming you have your microservices code and Dockerfiles ready, you can now build Docker images for your microservices. Navigate to your microservice project directories and run the following commands for each microservice:
+### Step 7: Build Microservice1 Image
+- This step builds the Docker image for `microservice1` using the Dockerfile in the `service1` directory.
 
-```bash
-docker build -t microservice1:1.0.0 .
-```
-```bash
-docker build -t microservice2:1.0.0 .
-```
+### Step 8: Build Microservice2 Image
+- This step builds the Docker image for `microservice2` using the Dockerfile in the `service2` directory.
 
-### Step 4: Deploy Microservices with Kubernetes
+### Step 9: Print Docker Images
+- This step lists Docker images to verify that the images have been built correctly.
 
-Now that you have Docker images for your microservices, you can create Kubernetes deployments and services for them.
+### Step 10: Deploy to Minikube
+- This step deploys the modified Kubernetes deployments and services to Minikube.
 
-1. Create a Kubernetes deployment YAML file for each microservice. Example YAML:
+### Step 11: List Deployments
+- This step lists the Kubernetes deployments in the cluster.
 
-   ```yaml
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-    name: serviceX-deployment
-    labels:
-        app: serviceX
-    spec:
-    replicas: 3
-    selector:
-        matchLabels:
-        app: serviceX
-    template:
-        metadata:
-        labels:
-            app: serviceX
-        spec:
-        containers:
-            - name: serviceX
-            imagePullPolicy: Never
-            image: microserviceX:1.0.0
-            ports:
-                - containerPort: <port>
-   ```
+### Step 12: List Services
+- This step lists the Kubernetes services in the cluster.
 
-2. Apply the deployment to your Minikube cluster using `kubectl`:
+### Step 13: List Pods
+- This step lists the pods in the cluster.
 
-   ```bash
-   kubectl apply -f <microservice-deployment.yaml>
-   ```
+### Step 14: Wait for Pods to Be Ready
+- This step waits for the pods to be ready by running a script (`check_pods.sh`) with a timeout of 15 minutes.
 
-   Repeat this step for each microservice.
+### Step 15: Test Service URLs
+- This step tests the service URLs by listing available services, displaying details of `service2-service`, and making a curl request to the service.
 
-3. Create a Kubernetes service YAML file for each microservice. Example YAML:
+## How to Run
 
-   ```yaml
-    apiVersion: v1
-    kind: Service
-    metadata:
-    name: serviceX-service
-    spec:
-    selector:
-        app: serviceX
-    ports:
-        - port: <port>
-        targetPort: <port>
-   ```
-
-   Replace `<microservice-name>` with your microservice's name.
-
-4. Apply the service to your Minikube cluster using `kubectl`:
-
-   ```bash
-   kubectl apply -f <microservice-service.yaml>
-   ```
-
-   Repeat this step for each microservice.
-
-### Step 5: Accessing Microservices
-
-To access your microservices, you can use Minikube's built-in service:
-
-```bash
-minikube service <microservice-name>-service
-```
-
-This will open a browser or terminal window with the URL to your microservice.
-
-Remember to clean up your resources when you're done:
-
-```bash
-minikube stop
-minikube delete
-```
+1. Ensure you have a Minikube cluster set up and running with the Docker driver.
+2. Place this GitHub Actions workflow file (`.github/workflows/deploy-to-minikube.yml`) in your project repository.
+3. Modify the deployment and service YAML files (`deployment-service1.yaml`, `deployment-service2.yaml`, `service-service1.yaml`, `service-service2.yaml`) to match your project's specifications.
+4. Make sure you have a `version.md` file in your repository with the version information.
+5. Ensure your Kubernetes services are of type NodePort.
+6. Push your code changes to the branch specified in the workflow (`05-setup-github-workflow` in this example).
+7. The workflow will automatically trigger on a push event to the specified branch, and all the deployment and testing steps will be executed in the GitHub Actions pipeline.
