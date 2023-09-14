@@ -151,6 +151,14 @@ kibana:
 - `environment`: Sets the `ELASTICSEARCH_HOSTS` environment variable to `http://elasticsearch:9200`, which tells Kibana where to find Elasticsearch.
 - `depends_on`: Specifies that the `kibana` service depends on the `elasticsearch` service, ensuring that `elasticsearch` starts before `kibana`.
 
+Don't forget to include the newly created columen at the end of your Dockerfile.
+
+```yaml
+volumes:
+  elasticsearch-data-volume:
+    driver: local
+```
+
 ## Step 4: Configure Fluentd
 
 Create a Fluentd configuration file (`fluentd.conf`) inside a `fluentd/conf` directory, which you mounted in the `fluentd` service in the `docker-compose.yml` file. Customize the configuration to match your log format and desired outputs.
