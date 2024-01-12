@@ -12,6 +12,7 @@ jobs:
     - name: Test
       run: |
         RESPONSE=$(curl https://api.github.com/repos/conrec-devops22/microservices/actions/runs -header "Authorization: Bearer $GITHUB_TOKEN" -header "Accept: application/vnd.github+json")
+        echo $RESPONSE
     - name: Start minikube
       uses: medyagh/setup-minikube@master
       id: minikube
