@@ -4,11 +4,10 @@ on:
     branches:
       - 07-testing-steps
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    name: Deploy to minikube in Github Actions!
+    name: Test
     steps:
-    - uses: actions/checkout@v2
     - name: Test
       run: |
         RESPONSE=$(curl https://api.github.com/repos/conrec-devops22/microservices-testing/actions/runs)
@@ -17,6 +16,11 @@ jobs:
         if [ "$STATUS" = "failure" ]; then
           exit 1
         fi
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+    - uses: actions/checkout@v2
     - name: Start minikube
       uses: medyagh/setup-minikube@master
       id: minikube
@@ -49,8 +53,41 @@ jobs:
       run: |
         eval $(minikube -p minikube docker-env)
         docker images
-  deploy:
-    name: deploy
+  qaDeploy:
+    name: Deploy to QA
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Deploy to minikube
+      run: |
+        eval $(minikube -p minikube docker-env)
+        kubectl apply -f modified-deployment-service1.yaml
+        kubectl apply -f modified-deployment-service2.yaml
+        kubectl apply -f service-service1.yaml
+        kubectl apply -f service-service2.yaml
+    - name: List deployments
+      run: kubectl get deploy
+    - name: List services
+      run: kubectl get service
+    - name: List pods
+      run: kubectl get pods
+    - name: Wait for pods to be ready
+      run: |
+        chmod +x ./check_pods.sh
+        ./check_pods.sh
+      timeout-minutes: 15
+    - name: Test service URLs
+      run: |
+        eval $(minikube -p minikube docker-env)
+        sleep 30
+        minikube service list
+        echo "------------------service details------------------"
+        kubectl get service service2-service
+        echo "------------------opening the service------------------"
+        echo
+        curl $(minikube service service2-service --url)/
+  prodDeploy:
+    name: Deploy to PROD
     runs-on: ubuntu-latest
     needs: build
     steps:
