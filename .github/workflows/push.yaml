@@ -11,8 +11,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Test
       run: |
-        RESPONSE=$(curl https://api.github.com/repos/conrec-devops22/microservices/actions/runs)
-        echo $RESPONSE
+        RESPONSE=$(curl https://api.github.com/repos/conrec-devops22/microservices-testing/actions/runs)
+        STATUS=$(echo $RESPONSE | jq -r '.workflow_runs[0].conclusion')
+        echo $STATUS
     - name: Start minikube
       uses: medyagh/setup-minikube@master
       id: minikube
