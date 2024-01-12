@@ -14,6 +14,9 @@ jobs:
         RESPONSE=$(curl https://api.github.com/repos/conrec-devops22/microservices-testing/actions/runs)
         STATUS=$(echo $RESPONSE | jq -r '.workflow_runs[0].conclusion')
         echo $STATUS
+        if [ "$STATUS" = "failure" ]; then
+          exit 1
+        fi
     - name: Start minikube
       uses: medyagh/setup-minikube@master
       id: minikube
