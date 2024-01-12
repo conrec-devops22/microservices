@@ -10,9 +10,9 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Test
+    name: Integration tests
     steps:
-    - name: Test
+    - name: Check automation pipeline status
       run: |
         RESPONSE=$(curl https://api.github.com/repos/conrec-devops22/microservices-testing/actions/runs)
         STATUS=$(echo $RESPONSE | jq -r '.workflow_runs[0].conclusion')
