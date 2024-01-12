@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   service1:
@@ -97,7 +97,6 @@ services:
 
 networks:
   my_network:
-
 
 volumes:
   elasticsearch-data-volume:

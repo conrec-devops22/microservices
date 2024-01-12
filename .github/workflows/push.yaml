@@ -2,7 +2,7 @@ name: Deploy to Minikube
 on:
   push:
     branches:
-      - 05-setup-github-workflow 
+      - 07-testing-steps
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,7 +40,11 @@ jobs:
     - name: Print docker images
       run: |
         eval $(minikube -p minikube docker-env)
-        docker images 
+        docker images
+    - name: Test
+      run: |
+        response = $(curl https://api.github.com/repos/conrec-devops22/microservices/actions/runs -header "Authorization: Bearer $GITHUB_TOKEN" -header "Accept: application/vnd.github+json")
+        echo response
     - name: Deploy to minikube
       run: |
         eval $(minikube -p minikube docker-env)
@@ -58,7 +62,7 @@ jobs:
       run: |
         chmod +x ./check_pods.sh
         ./check_pods.sh
-      timeout-minutes: 15 
+      timeout-minutes: 15
     - name: Test service URLs
       run: |
         eval $(minikube -p minikube docker-env)
@@ -67,5 +71,5 @@ jobs:
         echo "------------------service details------------------"
         kubectl get service service2-service
         echo "------------------opening the service------------------"
-        echo 
-        curl $(minikube service service2-service --url)/        
+        echo
+        curl $(minikube service service2-service --url)/
