@@ -65,7 +65,7 @@ jobs:
     steps:
     - uses: trstringer/manual-approval@v1
       with:
-        secret: $GITHUB_TOKEN
+        secret: ${{ github.TOKEN }}
         approvers: jonconinf
     - name: Deploy to minikube
       run: |
