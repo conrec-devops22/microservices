@@ -49,6 +49,15 @@ jobs:
       run: |
         eval $(minikube -p minikube docker-env)
         docker images
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ github.TOKEN }}
+        approvers: jonconinf
     - name: Deploy to minikube
       run: |
         eval $(minikube -p minikube docker-env)
