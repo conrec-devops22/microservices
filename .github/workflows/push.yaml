@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - 07-testing-steps
+
+permissions:
+  issues: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
