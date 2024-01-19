@@ -59,7 +59,7 @@ metrics.info("app_info", " Service 1", version="1.0.0")
 @app.route("/")
 def hello_world():
     app.logger.info("Service 1 called")
-    return "Hello, World!"
+    return "Hello, World! This is the version 1"
 
 
 # Important to run the app without debug mode or metrics endpoint will not be available

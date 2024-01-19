@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1-deployment-stable
+  labels:
+    app: service1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: service1
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: service1
+        version: stable
+    spec:
+      containers:
+        - name: service1
+          imagePullPolicy: Never
+          image: microservice1:stable
+          ports:
+            - containerPort: 5001
