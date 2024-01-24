@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service1-deployment-canary
+  name: service1-deployment-v1
   labels:
     app: service1
 spec:
@@ -9,16 +9,16 @@ spec:
   selector:
     matchLabels:
       app: service1
-      version: canary
+      version: v1
   template:
     metadata:
       labels:
         app: service1
-        version: canary
+        version: v1
     spec:
       containers:
         - name: service1
           imagePullPolicy: Never
-          image: microservice1:canary
+          image: microservice1:1.0.0
           ports:
             - containerPort: 5001

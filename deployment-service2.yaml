@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service2-deployment-stable
+  name: service2-deployment-v1
   labels:
     app: service2
 spec:
@@ -19,6 +19,6 @@ spec:
       containers:
         - name: service2
           imagePullPolicy: Never
-          image: microservice2:stable
+          image: microservice2:1.0.0
           ports:
             - containerPort: 5002
