@@ -7,4 +7,4 @@ scrape_configs:
       - targets: ['service1-service:5001']
   - job_name: service2
     static_configs:
-      - targets: ['service2-service:5002']      
+      - targets: ['service2-service:5002']
