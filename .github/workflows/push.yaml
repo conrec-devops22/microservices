@@ -2,7 +2,7 @@ name: Deploy to Minikube
 on:
   push:
     branches:
-      - 07-testing-steps
+      - 12-traefik-integration
 
 permissions:
   issues: write
