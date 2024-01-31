@@ -11,7 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Build
-    needs: test
     steps:
     - uses: actions/checkout@v2
     - name: Print current app version
@@ -37,6 +36,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Integration tests
+    needs: test
     steps:
     - name: Check automation pipeline status
       run: |
