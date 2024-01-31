@@ -36,7 +36,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Integration tests
-    needs: test
+    needs: build
     steps:
     - name: Check automation pipeline status
       run: |
