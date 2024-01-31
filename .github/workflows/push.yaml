@@ -107,7 +107,7 @@ jobs:
         eval $(minikube -p minikube docker-env)
         kubectl apply -f modified-deployment-service1.yaml
         kubectl apply -f modified-deployment-service2.yaml
-        kubectl apply -f traefik.yaml
+        kubectl apply -f deployment-traefik.yaml
     - name: List deployments
       run: kubectl get deploy
     - name: List services
