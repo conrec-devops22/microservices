@@ -96,6 +96,11 @@ jobs:
       run: |
           eval $(minikube -p minikube docker-env)
           docker images
+    - name: Install helm dependencies
+      run: |
+        helm repo update
+        helm repo add traefik https://traefik.github.io/charts
+        helm install --namespace=traefik traefik traefik/traefik
     - name: Deploy to minikube
       run: |
         eval $(minikube -p minikube docker-env)
@@ -103,6 +108,7 @@ jobs:
         kubectl apply -f modified-deployment-service2.yaml
         kubectl apply -f service-service1.yaml
         kubectl apply -f service-service2.yaml
+        kubectl apply -f traefik.yaml
     - name: List deployments
       run: kubectl get deploy
     - name: List services
