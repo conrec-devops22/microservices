@@ -8,36 +8,12 @@ permissions:
   issues: write
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    name: Integration tests
-    steps:
-    - name: Check automation pipeline status
-      run: |
-        RESPONSE=$(curl https://api.github.com/repos/conrec-devops22/microservices-testing/actions/runs)
-        STATUS=$(echo $RESPONSE | jq -r '.workflow_runs[0].conclusion')
-        echo $STATUS
-        if [ "$STATUS" = "failure" ]; then
-          exit 1
-        fi
   build:
     runs-on: ubuntu-latest
     name: Build
     needs: test
     steps:
     - uses: actions/checkout@v2
-    - name: Start minikube
-      uses: medyagh/setup-minikube@master
-      id: minikube
-      with:
-        driver: docker
-        wait: all
-    - name: Try the cluster
-      run: kubectl get pods -A
-    - name: Setup Docker environment
-      run: |
-        export SHELL=/bin/bash
-        eval $(minikube -p minikube docker-env)
     - name: Print current app version
       run: |
         echo "current_version=$(grep '# version' version.md | cut -d ' ' -f3)" >> $GITHUB_ENV
@@ -58,15 +34,35 @@ jobs:
       run: |
         eval $(minikube -p minikube docker-env)
         docker images
+  test:
+    runs-on: ubuntu-latest
+    name: Integration tests
+    steps:
+    - name: Check automation pipeline status
+      run: |
+        RESPONSE=$(curl https://api.github.com/repos/conrec-devops22/microservices-testing/actions/runs)
+        STATUS=$(echo $RESPONSE | jq -r '.workflow_runs[0].conclusion')
+        echo $STATUS
+        if [ "$STATUS" = "failure" ]; then
+          exit 1
+        fi
   qaDeploy:
     name: Deploy to QA
     runs-on: ubuntu-latest
     needs: build
     steps:
-    - uses: trstringer/manual-approval@v1
+    - name: Start minikube
+      uses: medyagh/setup-minikube@master
+      id: minikube
       with:
-        secret: ${{ github.TOKEN }}
-        approvers: jonconinf
+        driver: docker
+        wait: all
+    - name: Try the cluster
+      run: kubectl get pods -A
+    - name: Setup Docker environment
+      run: |
+        export SHELL=/bin/bash
+        eval $(minikube -p minikube docker-env)
     - name: Deploy to minikube
       run: |
         eval $(minikube -p minikube docker-env)
@@ -104,6 +100,18 @@ jobs:
       with:
         secret: ${{ github.TOKEN }}
         approvers: jonconinf
+    - name: Start minikube
+      uses: medyagh/setup-minikube@master
+      id: minikube
+      with:
+        driver: docker
+        wait: all
+    - name: Try the cluster
+      run: kubectl get pods -A
+    - name: Setup Docker environment
+      run: |
+        export SHELL=/bin/bash
+        eval $(minikube -p minikube docker-env)
     - name: Deploy to minikube
       run: |
         eval $(minikube -p minikube docker-env)
@@ -137,6 +145,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: uatDeploy
     steps:
+    - name: Start minikube
+      uses: medyagh/setup-minikube@master
+      id: minikube
+      with:
+        driver: docker
+        wait: all
+    - name: Try the cluster
+      run: kubectl get pods -A
+    - name: Setup Docker environment
+      run: |
+        export SHELL=/bin/bash
+        eval $(minikube -p minikube docker-env)
     - name: Deploy to minikube
       run: |
         eval $(minikube -p minikube docker-env)
