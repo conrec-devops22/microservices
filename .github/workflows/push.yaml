@@ -119,9 +119,13 @@ jobs:
         chmod +x ./check_pods.sh
         ./check_pods.sh
       timeout-minutes: 15
+    - name: Add service 2 to /etc/hosts
+      run: |
+        sudo echo "127.0.0.1 service2" | sudo tee -a /etc/hosts
     - name: Test service URLs
       run: |
         eval $(minikube -p minikube docker-env)
+        curl service2:5002
         sleep 30
         minikube service list
         echo "------------------service details------------------"
