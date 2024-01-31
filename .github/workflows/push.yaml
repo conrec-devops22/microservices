@@ -98,8 +98,8 @@ jobs:
           docker images
     - name: Install helm dependencies
       run: |
-        helm repo update
         helm repo add traefik https://traefik.github.io/charts
+        helm repo update
         helm install --namespace=traefik traefik traefik/traefik
     - name: Deploy to minikube
       run: |
